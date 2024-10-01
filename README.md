@@ -11,10 +11,11 @@ This project is a Python application that scrapes job postings across the US fro
 ## Table of Contents
 1. [Overview](#overview)
 2. [Project Setup](#project-setup)
-3. [Features](#features)
-4. [Technologies Used](#technologies-used)
-5. [Team](#team)
-6. [License](#license)
+3. [Installation](#Installation)
+4. [Features](#features)
+5. [Technologies Used](#technologies-used)
+6. [Team](#team)
+7. [License](#license)
 
 ---
 
@@ -40,7 +41,19 @@ This project focuses on building a job market analysis platform using data scrap
 - Database (e.g., PostgreSQL, SQLite) or flat file (CSV/JSON) for data storage
 - Libraries: pandas, NumPy, matplotlib, seaborn, Dash/Streamlit
 
---
+### Installation
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/Barderus/job-market-dashboard.git
+    cd job-market-dashboard
+    ```
+
+2. Install the required dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
 
 ## Features
 
@@ -67,7 +80,7 @@ This project focuses on building a job market analysis platform using data scrap
 
 ## Team
 
-**Project Manager:** Gabriel dos Reis  
+**Project Manager:** [Gabriel dos Reis](https://github.com/Barderus)
 **Team Members:**  
 - 
 
