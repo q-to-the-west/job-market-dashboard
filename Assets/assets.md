@@ -1,5 +1,7 @@
 # This file contains all the resources you need
 
+0. Virtual Environment
+   * [Python Documentation](https://docs.python.org/3/library/venv.html)
 1. BeautifulSoup documentation:
     *  [Documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
     * [Real Python Tutorial](https://realpython.com/beautiful-soup-web-scraper-python/)
