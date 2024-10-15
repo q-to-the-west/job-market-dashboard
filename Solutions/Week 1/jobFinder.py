@@ -1,16 +1,34 @@
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 
-htmlText = requests.get("https://www.remotepython.com/jobs/?q=Python")
+website = requests.get('https://www.remotepython.com/jobs/?q=Python').text
+soup = BeautifulSoup(website, 'html.parser')
 
-soup = BeautifulSoup(htmlText.text, "html.parser")
+job_listings = soup.find_all(class_='col-md-11')
+job_dict = {}
 
-counter = 1
+# Loops through each listing to gather job data
+index = 1
+for listing in job_listings:
+    title = listing.find(class_='no-margin-top').text.strip()
+    company = listing.find(class_='color-black').text
+    description = listing.p.text.strip()
+    posting_date = listing.div.find(class_='color-white-mute').text
+    try:
+        location = listing.h5.find(class_='color-white-mute').text
+    except AttributeError:
+        location = 'None given'
 
-allSections = soup.find_all(class_="item")
-for section in allSections:
-    print()
-    print(f"----------Job {counter}----------")
-    print(section.get_text().strip())
-    print()
-    counter += 1
+    # Updating dictionary with '{job title: {corresponding info}}'
+    job_dict[f'job{index}'] = {'title': title, 'company': company, 'desc': description,
+                               'date': posting_date, 'location': location}
+    index += 1
+
+    print(f'Title: {title}\nCompany: {company}\nDescription: {description}\n'
+          f'Location: {location}\n{posting_date}\n')
+
+print(job_dict)
+df = pd.DataFrame(job_dict)
+print(df)
+
