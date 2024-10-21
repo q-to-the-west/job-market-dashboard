@@ -83,7 +83,7 @@ This project focuses on building a job market analysis platform using data scrap
 **Project Manager:** [Gabriel dos Reis](https://github.com/Barderus)
 
 **Team Members:**  
-- 
+- {Leo Cortez}
 
 ---
 
