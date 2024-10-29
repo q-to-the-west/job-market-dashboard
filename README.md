@@ -85,7 +85,7 @@ This project focuses on building a job market analysis platform using data scrap
 **Team Members:**  
 - {Leo Cortez}
 - {Zachary Oliver}
-
+- {Daniel Cruz} (https://www.linkedin.com/in/danielcruzromero/)
 ---
 
 ## License
