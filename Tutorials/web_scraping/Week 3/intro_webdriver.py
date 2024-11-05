@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 
 
 chrome_driver_path = "../../../Testing/chromedriver.exe"
-user_input = input("Search for: ")
+user_input = "College of DuPage "
 url = "https://www.google.com.br/"
 
 # Set up driver
