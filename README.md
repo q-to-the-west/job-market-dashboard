@@ -70,7 +70,7 @@ This project focuses on building a job market analysis platform using data scrap
 ## Technologies Used
 
 - **Programming Languages:** Python
-- **Web Scraping Tools:** BeautifulSoup
+- **Web Scraping Tools:** BeautifulSoup, Selenium
 - **Database:** PostgreSQL/SQLite/MongoDB  (for storing job data)
 - **Data Analysis:** pandas, NumPy, scikit-learn
 - **Visualization:** Matplotlib, Seaborn, Plotly, Dash/Streamlit
