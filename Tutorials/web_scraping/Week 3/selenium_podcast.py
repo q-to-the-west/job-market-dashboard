@@ -28,7 +28,7 @@ def navigate_to_next_page(driver):
 def main():
     print("Launching Chrome browser...")
     url = "https://darknetdiaries.com/episode/"
-    chrome_driver_path = "../../../Testing/chromedriver.exe"
+    #chrome_driver_path = "../../../Testing/chromedriver.exe"
 
     # Create a dictionary to hold the values
     podcast_episodes = {"Title": [], "Released": [], "Duration": [], "Link": []}
@@ -37,7 +37,8 @@ def main():
     chrome_options = webdriver.ChromeOptions()
 
     # chrome_options.add_argument("--headless=new")
-    driver = webdriver.Chrome(service=Service(chrome_driver_path), options=chrome_options)
+    #driver = webdriver.Chrome(service=Service(chrome_driver_path), options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     driver.implicitly_wait(10)  # Wait 10 seconds
 
     # Visit target website

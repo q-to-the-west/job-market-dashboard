@@ -18,7 +18,6 @@ from selenium import webdriver
 from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
 
@@ -67,7 +66,8 @@ def main():
     random_user_agent = random.choice(user_agents)
     chrome_options.add_argument(f"--user-agent={random_user_agent}")
 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+    #driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
 
     job_dict = {"unique_title":[],          # Unique job title
                 "title": [],                # Title of the job
