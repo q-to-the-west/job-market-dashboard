@@ -84,7 +84,9 @@ This project focuses on building a job market analysis platform using data scrap
 
 **Team Members:**  
 - {Leo Cortez}
+- {Mike Kelley}
 - {Zachary Oliver}
+- [Quest Hill](https://www.linkedin.com/in/quest-hill/)
 - [Daniel Cruz](https://www.linkedin.com/in/danielcruzromero/)
 ---
 
