@@ -7,6 +7,7 @@ In this meeting, we divided the team into smaller groups, using a divide-and-con
 - **Team 1:** Quest Hill, Mike, Jack  
   *Focus: SimplyHired website*
   * Finding the classes to get the data from SimplyHired
+  * Page navigation almost completed; in final testing
 
 - **Team 2:** Gabriel, David  
   *Focus: Monster website initially, but encountered bot detection and were blocked. Currently exploring JobList, which shows promise.*
