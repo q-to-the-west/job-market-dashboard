@@ -2,11 +2,11 @@
 
 - We discussed how we are going to structure our dataframes
   - Example:
-| unique_title | title             | job_location | education | languages        | framework       | others          | wage | salary | company   | remote | job_type     |
-|--------------|-------------------|--------------|-----------|------------------|-----------------|-----------------|------|--------|-----------|--------|--------------|
-|              |                   |              |           |                  |                 |                 |      |        |           |        |              |
-|              |                   |              |           |                  |                 |                 |      |        |           |        |              |
-|              |                   |              |           |                  |                 |                 |      |        |           |        |              |
+| unique_title | title  | job_location | education | languages  | framework   | others   | wage | salary | company   | remote | job_type     |
+|--------------|--------|--------------|-----------|------------|-------------|----------|------|--------|-----------|--------|--------------|
+|              |        |              |           |            |             |          |      |        |           |        |              |
+|              |        |              |           |            |             |          |      |        |           |        |              |
+|              |        |              |           |            |             |          |      |        |           |        |              |
 
 
 ### Column Labels Explanation:
