@@ -1,8 +1,5 @@
-import time
 import random
-import requests
 import pandas as pd
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium_stealth import stealth
 from selenium.webdriver.common.by import By
@@ -54,42 +51,42 @@ user_agents = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH
 # https://stackoverflow.com/questions/52603847/how-to-sleep-selenium-webdriver-in-python-for-milliseconds
 
 # Wait to receive some existing WebElement
-def wait_for_present_element(driver, by, search_term, timeout=9999, ignored_exceptions=ignored_exceptions):
+def wait_for_present_element(driver, by, search_term, timeout=9999, poll_frequency=0.15, ignored_exceptions=ignored_exceptions):
     return WebDriverWait(driver=driver,
                          timeout=timeout,
                          ignored_exceptions=ignored_exceptions).until(
                          EC.presence_of_element_located((by, search_term)))
 
 # Wait to find some list of existing WebElements
-def wait_for_present_elements(driver, by, search_term, timeout=9999, ignored_exceptions=ignored_exceptions):
+def wait_for_present_elements(driver, by, search_term, timeout=9999, poll_frequency=0.15, ignored_exceptions=ignored_exceptions):
     return WebDriverWait(driver=driver,
                          timeout=timeout,
                          ignored_exceptions=ignored_exceptions).until(
                          EC.presence_of_all_elements_located((by, search_term)))
 
 # Wait to receive some existing and visible WebElement
-def wait_for_visible_element(driver, by, search_term, timeout=9999, ignored_exceptions=ignored_exceptions):
+def wait_for_visible_element(driver, by, search_term, timeout=9999, poll_frequency=0.15, ignored_exceptions=ignored_exceptions):
     return WebDriverWait(driver=driver,
                          timeout=timeout,
                          ignored_exceptions=ignored_exceptions).until(
                          EC.visibility_of_element_located((by, search_term)))
 
 # Wait to find some list of existing and visible WebElements
-def wait_for_visible_elements(driver, by, search_term, timeout=9999, ignored_exceptions=ignored_exceptions):
+def wait_for_visible_elements(driver, by, search_term, timeout=9999, poll_frequency=0.15, ignored_exceptions=ignored_exceptions):
     return WebDriverWait(driver=driver,
                          timeout=timeout,
                          ignored_exceptions=ignored_exceptions).until(
                          EC.visibility_of_all_elements_located((by, search_term)))
 
 # Wait until an WebElement is clickable using the WebElement
-def wait_to_click(driver, timeout=9999, ignored_exceptions=ignored_exceptions):
+def wait_to_click(driver, timeout=9999, poll_frequency=0.15, ignored_exceptions=ignored_exceptions):
     return WebDriverWait(driver=driver,
                          timeout=timeout,
                          ignored_exceptions=ignored_exceptions).until(
                          EC.element_to_be_clickable(driver))
 
 # Wait until an WebElement is clickable using By and a search term
-def wait_to_click_by(driver, by, search_term, timeout=9999, ignored_exceptions=ignored_exceptions):
+def wait_to_click_by(driver, by, search_term, timeout=9999, poll_frequency=0.15, ignored_exceptions=ignored_exceptions):
     return WebDriverWait(driver=driver,
                          timeout=timeout,
                          ignored_exceptions=ignored_exceptions).until(
@@ -98,7 +95,7 @@ def wait_to_click_by(driver, by, search_term, timeout=9999, ignored_exceptions=i
 # Clicks on the element specified so that
 # a box containing its enlarged information
 # appears on the right
-def get_enlarged_info(driver: ChromeDriver, element: WebElement, old_box):#, old_text):
+def get_enlarged_info(driver: ChromeDriver, element: WebElement, old_box):
     try:
         clickable = wait_to_click_by(element, By.XPATH, ".//div")
         clickable.click()
@@ -133,6 +130,9 @@ def get_enlarged_info(driver: ChromeDriver, element: WebElement, old_box):#, old
 # providing help with locators:
 # https://www.selenium.dev/documentation/test_practices/encouraged/locators/
 
+# List of ways to wait for a page:
+# https://www.browserstack.com/guide/selenium-wait-for-page-to-load
+
 # Where the action is at B)
 def scrape_page(driver: ChromeDriver, job_dict):
     try:
@@ -145,35 +145,57 @@ def scrape_page(driver: ChromeDriver, job_dict):
         elements = wait_for_visible_elements(job_entries, By.TAG_NAME, "li")
 
         info_box = None
-        #info_text = None
     
         for element in elements:
             try:
                 # Stores the expanded info for the current job listing :D
-                info_box = get_enlarged_info(driver, element, info_box)#, info_text)
+                info_box = get_enlarged_info(driver, element, info_box)
 
                 # Scrapes info from the current enlarged info box
                 # and stores it in our dictionary of job info :D
-                job_dict["Unique Title"].append("softDev")
-                job_dict["Title"].append(wait_for_visible_element(info_box, By.XPATH, ".//div/aside/header/div/div/div[1]/h2").text.strip())
-                job_dict["Job Location"].append(wait_for_visible_element(info_box, By.XPATH, ".//div/aside/header/div/div/div[2]/div[1]/span[2]/span/span").text.strip())
-                job_dict["Company Name"].append(wait_for_visible_element(info_box, By.XPATH, ".//div/aside/header/div/div/div[2]/div[1]/span[1]/span/span[1]").text.strip())
 
-                # Copy-paste for getting the XPATH
-                # to search for the remaining values:
-                # job_dict[""].append(wait_for_visible_element(info_box, By.XPATH, "").text.strip())
+                # New methods for searching
+                # field info, courtesty of Mike
+                job_dict["Unique Title"].append("SoftDev")
+                job_dict["Title"].append(wait_for_visible_element(element, By.TAG_NAME, "a").text.strip())
+                job_dict["Job Location"].append(wait_for_visible_element(element, By.CLASS_NAME, "css-1t92pv").text.strip())
+                job_dict["Company Name"].append(wait_for_visible_element(element, By.CSS_SELECTOR, 'span[data-testid="companyName"]').text.strip())
+                
+                try:
+                    job_dict["Job Type"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'span[data-testid="viewJobBodyJobDetailsJobType"]', 0.25, 0.1).text.strip())
+
+                except TimeoutException:
+                    print("Job Type Unknown")
+                    job_dict["Job Type"].append("unknown")
+
+                try:
+                    job_dict["Salary"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'span[data-testid="viewJobBodyJobCompensation"]', 0.25, 0.1).text.strip())
+
+                except TimeoutException:
+                    print("Salary Unknown")
+                    job_dict["Salary"].append("unknown")
+
+                # Old job dictionary management; deprecated
+                #job_dict["Unique Title"].append("softDev")
+                #job_dict["Title"].append(wait_for_visible_element(info_box, By.XPATH, ".//div/aside/header/div/div/div[1]/h2").text.strip())
+                #job_dict["Job Location"].append(wait_for_visible_element(info_box, By.XPATH, ".//div/aside/header/div/div/div[2]/div[1]/span[2]/span/span").text.strip())
+                #job_dict["Company Name"].append(wait_for_visible_element(info_box, By.XPATH, ".//div/aside/header/div/div/div[2]/div[1]/span[1]/span/span[1]").text.strip())
+                #job_dict["Job Type"].append(wait_for_visible_element(info_box, By.XPATH, ".//div/aside/div/div[1]/div/div[1]/div/span[1]/span/span").text.strip())
+
+                # Copy-paste for getting data for new field:
+                # job_dict["FIELD"].append(wait_for_visible_element(info_box, By.SOMETHING, "SEARCH_TERM").text.strip())
                 
             except NoSuchElementException:
                 print("Whoops! Job element not found!")
 
-            #except StaleElementReferenceException:
-            #    print("Element no longer detected: scrape inner operations")
+            except StaleElementReferenceException:
+                print("Element no longer detected: scrape inner operations")
         
     except NoSuchElementException:
         print("Page structure misalignment!")
     
-    #except StaleElementReferenceException:
-    #    print("Element no longer detected: scrape outer operations")
+    except StaleElementReferenceException:
+        print("Element no longer detected: scrape outer operations")
 
 # Navigates to the next page.
 # Simple enough, right? Heh...
@@ -193,8 +215,8 @@ def wait_for_next_page(driver: ChromeDriver, current_page: int) -> int:
     try:
         while page_number <= current_page:
             try:
-                page_navigation = wait_for_visible_element(driver, By.CLASS_NAME, "css-1hog1e3", 0.3)
-                current_page_element = wait_for_visible_element(page_navigation, By.TAG_NAME, "span", 0.3)
+                page_navigation = wait_for_visible_element(driver, By.CLASS_NAME, "css-1hog1e3", 0.7, 0.5)
+                current_page_element = wait_for_visible_element(page_navigation, By.TAG_NAME, "span", 0.7, 0.5)
 
                 page_number = int(current_page_element.text.strip())
                 print(f'Page number: {page_number}')
@@ -221,10 +243,10 @@ def main():
                 "Title": [],                # Title of the job
                 "Job Location": [],         # Location ( State )
                 "Company Name": [],         # Company name
-                #"Job Type": [],             # Whether full-time, part-time, intern
+                "Job Type": [],             # Whether full-time, part-time, intern
                 #"Remote": [],               # Remote, in-person, hybrid
                 #"Wage": [],                 # $ per hour
-                #"Salary": [],               # $ per year
+                "Salary": [],               # $ per year
                 #"Education": [],            # Undergrad, master, phd
                 #"Languages": [],            # Programming languages
                 #"Frameworks": [],           # React, Angular, Django, Flask, etc
@@ -242,8 +264,9 @@ def main():
     # not automating a page and help us appear
     # to share much more likeness to a normal
     # user as we scrape.
-    chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
     chrome_options.add_experimental_option('useAutomationExtension', False)
+    # chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
 
     # The "--headless" argument means that the
     # scraping will occur without showing the
