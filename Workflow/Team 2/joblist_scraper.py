@@ -79,19 +79,14 @@ def scrape_page(driver, job_dict):
     return job_dict
 
 
-def scroll_down(driver):
-    while True:
-        last_height = driver.execute_script("return document.body.scrollHeight")
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-
-        driver.implicitly_wait(5)  # Wait 5 seconds
-
-        # Get the new height and compare with last height
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            scrape_page()
-            break
-        last_height = new_height
+def next_page(driver):
+    try:
+        next_page_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "css-1vk6oae")))
+        next_page_button.click()
+        return True
+    except NoSuchElementException:
+        print("No more pages available")
+        return False
 
 def main():
     # Set up Chrome options
@@ -155,7 +150,7 @@ def main():
                 #"others":[]                 # Database, Cloud technologies, etc
                 }
 
-    url = "https://www.monster.com/jobs/search?q=Software+developer&where=&page=1&so=m.h.lh"
+    url = "https://www.joblist.com/search?l=Chicago%2C+IL&q=software+developer&lr=WITHIN_25_MILES"
     url2 = "https://www.joblist.com/search?l=Chicago%2C+IL&q=software+engineer&lr=WITHIN_25_MILES&pid=internal"
     url3 = "https://www.joblist.com/search?l=Chicago%2C+IL&q=data+scientist&lr=WITHIN_25_MILES&pid=internal"
     url4 = "https://www.joblist.com/search?l=Chicago%2C+IL&q=Machine+learning+engineer&lr=WITHIN_25_MILES&pid=internal"
