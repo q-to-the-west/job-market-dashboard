@@ -20,7 +20,7 @@ ignored_exceptions = (NoSuchElementException, StaleElementReferenceException)
 # Assuming there are 260 working days in a year...
 YEARLY_WORK_DAYS = 260
 
-# Assuming that x hours a day are worked on average...
+# Assuming that 8 hours a day are worked on average...
 DAILY_WORK_HOURS = 8
 
 # List of user agent strings
@@ -165,7 +165,12 @@ def scrape_page(driver: ChromeDriver, job_dict):
                 job_dict["Unique Title"].append("SoftDev")
                 job_dict["Title"].append(wait_for_visible_element(element, By.TAG_NAME, "a").text.strip())
                 job_dict["Job Location"].append(wait_for_visible_element(element, By.CLASS_NAME, "css-1t92pv").text.strip())
-                job_dict["Company Name"].append(wait_for_visible_element(element, By.CSS_SELECTOR, 'span[data-testid="companyName"]').text.strip())
+                job_dict["Company Name"].append(wait_for_visible_element(element, By.CSS_SELECTOR, 'span[data-testid="companyName"]').text)
+
+                try:
+                    job_dict["Job Info"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'div[data-testid="viewJobBodyJobFullDescriptionContent"]', 0.03, 0.3).text.strip())
+                except:
+                    print("No Job Info :(")
                 
                 try:
                     job_dict["Job Type"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'span[data-testid="viewJobBodyJobDetailsJobType"]', 0.065, 0.01).text.strip())
@@ -310,7 +315,7 @@ def parse_salary_info(listings: list):
 
 def main():
     # How many pages to search
-    pages_to_search = 2
+    pages_to_search = 1
 
     # Establishing our dictionary of job listing data
     job_dict = {
@@ -318,6 +323,7 @@ def main():
         "Title": [],                # Title of the job
         "Job Location": [],         # Location ( State )
         "Company Name": [],         # Company name
+        "Job Info": [],
         "Job Type": [],             # Whether full-time, part-time, intern
         #"Remote": [],               # Remote, in-person, hybrid
         #"Wage": [],                 # $ per hour
