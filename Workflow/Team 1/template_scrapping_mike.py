@@ -71,9 +71,13 @@ def scrape_page(driver, job_dict):
             all_quals = driver.find_elements(By.CSS_SELECTOR, 'span[data-testid="viewJobQualificationItem"]')
             for qual in all_quals:
                 qual_list.append(qual.text.strip())
+                
             job_dict['QUALIFICATIONS'].append(qual_list)
         except Exception as err:
-            print("not found")
+            qual_list.append("none listed")
+            job_dict['Qualifications'].append(qual_list)
+            
+            
 
 def next_page(driver: ChromeDriver):
        
