@@ -65,7 +65,15 @@ def scrape_page(driver, job_dict):
             job_dict['SALARY'].append(salary_wage.text.strip())
         except Exception as err:
             job_dict['SALARY'].append("unknown")
-            
+
+        try:
+            qual_list = []
+            all_quals = driver.find_elements(By.CSS_SELECTOR, 'span[data-testid="viewJobQualificationItem"]')
+            for qual in all_quals:
+                qual_list.append(qual.text.strip())
+            job_dict['QUALIFICATIONS'].append(qual_list)
+        except Exception as err:
+            print("not found")
 
 def next_page(driver: ChromeDriver):
        
@@ -117,7 +125,7 @@ def main():
                 #"education": [],            # Undergrad, master, phd
                 #"prog_language": [],        # Programming languages
                 #"framework": [],            # React, Angular, Django, Flask, etc
-                #"others":[]                 # Database, Cloud technologies, etc
+                "QUALIFICATIONS":[]          # Database, Cloud technologies, etc
                 }
 
     url = "https://www.simplyhired.com/search?q=software+developer&l=Chicago%2C+IL"
@@ -126,7 +134,7 @@ def main():
 
     
 
-    for i in range(2):
+    for i in range(1):
         scrape_page(driver, job_dict)
         next_page(driver)
         
