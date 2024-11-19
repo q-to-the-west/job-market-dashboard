@@ -165,7 +165,7 @@ def scrape_page(driver: ChromeDriver, job_dict):
                 job_dict["Unique Title"].append("SoftDev")
                 job_dict["Title"].append(wait_for_visible_element(element, By.TAG_NAME, "a").text.strip())
                 job_dict["Job Location"].append(wait_for_visible_element(element, By.CLASS_NAME, "css-1t92pv").text.strip())
-                job_dict["Company Name"].append(wait_for_visible_element(element, By.CSS_SELECTOR, 'span[data-testid="companyName"]').text)
+                job_dict["Company Name"].append(wait_for_visible_element(element, By.CSS_SELECTOR, 'span[data-testid="companyName"]').text.strip())
 
                 try:
                     job_dict["Job Info"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'div[data-testid="viewJobBodyJobFullDescriptionContent"]', 0.03, 0.3).text.strip())
@@ -185,18 +185,23 @@ def scrape_page(driver: ChromeDriver, job_dict):
                 except TimeoutException:
                     print("Salary Unknown")
                     job_dict["Salary"].append("unknown")
-
+                
+                # TODO: Turn values in qual_list one string,
+                # separating each value by a comma. Use this
+                # string as the value to put inside of job_dict
+                # instead of the list itself.
+                qual_list = []
                 try:
-                    qual_list = []
                     all_quals = wait_for_visible_elements(info_box, By.CSS_SELECTOR, 'span[data-testid="viewJobQualificationItem"]', 0.065, 0.01)
                     for qual in all_quals:
                         qual_list.append(qual.text.strip())
                 
-                    job_dict['Qualifications'].append(qual_list)
+                    job_dict["Qualifications"].append(qual_list)
+
                     print(qual_list)
-                except Exception as err:
+                except TimeoutError:
                     qual_list.append("none listed")
-                    job_dict['Qualifications'].append(qual_list)
+                    job_dict["Qualifications"].append(qual_list)
                     print(qual_list)
 
                 # Copy-paste for getting data for new field:
@@ -336,7 +341,7 @@ def main():
         "Title": [],                # Title of the job
         "Job Location": [],         # Location ( State )
         "Company Name": [],         # Company name
-        "Job Info": [],
+        "Job Info": [],             # An explanation of the givn position
         "Job Type": [],             # Whether full-time, part-time, intern
         #"Remote": [],               # Remote, in-person, hybrid
         #"Wage": [],                 # $ per hour
