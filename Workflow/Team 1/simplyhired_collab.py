@@ -186,6 +186,19 @@ def scrape_page(driver: ChromeDriver, job_dict):
                     print("Salary Unknown")
                     job_dict["Salary"].append("unknown")
 
+                try:
+                    qual_list = []
+                    all_quals = wait_for_visible_elements(info_box, By.CSS_SELECTOR, 'span[data-testid="viewJobQualificationItem"]', 0.065, 0.01)
+                    for qual in all_quals:
+                        qual_list.append(qual.text.strip())
+                
+                    job_dict['Qualifications'].append(qual_list)
+                    print(qual_list)
+                except Exception as err:
+                    qual_list.append("none listed")
+                    job_dict['Qualifications'].append(qual_list)
+                    print(qual_list)
+
                 # Copy-paste for getting data for new field:
                 # job_dict["FIELD"].append(wait_for_visible_element(info_box, By.SOMETHING, "SEARCH_TERM").text.strip())
                 
@@ -331,7 +344,7 @@ def main():
         #"Education": [],            # Undergrad, master, phd
         #"Languages": [],            # Programming languages
         #"Frameworks": [],           # React, Angular, Django, Flask, etc
-        #"Other": []                 # Database, Cloud technologies, etc
+        "Qualifications": []         # Database, Cloud technologies, etc
     }
     
     # Setting up Chrome Options
