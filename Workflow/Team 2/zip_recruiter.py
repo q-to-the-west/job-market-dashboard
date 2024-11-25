@@ -1,10 +1,8 @@
 import random
-import time
 
 import pandas as pd
 from selenium import webdriver
-from selenium.common import NoSuchElementException, TimeoutException, ElementClickInterceptedException, \
-    StaleElementReferenceException
+from selenium.common import TimeoutException, StaleElementReferenceException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -59,7 +57,6 @@ def scrape_page(driver, job_dict, url):
             WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, job_cards_selector)))
             job.click()
 
-
             # Wait until the URL changes
             WebDriverWait(driver, 10).until(EC.url_changes(url))
 
@@ -71,17 +68,22 @@ def scrape_page(driver, job_dict, url):
                 driver.get(url)
 
             # Extract job details
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-testid='right-pane']")))
-            job_title = driver.find_element(By.CSS_SELECTOR, "h1.font-bold.text-primary.text-header-md.md\:text-header-md-tablet").text
-            job_location = driver.find_element(By.CSS_SELECTOR, "div.mb-24 p.text-primary.normal-case.text-body-md").text
-            company_name = driver.find_element(By.CSS_SELECTOR, "div.flex.justify-between.items-start a.text-primary").text
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-testid='right-pane']")))
+            job_title = driver.find_element(By.CSS_SELECTOR,
+                                            "h1.font-bold.text-primary.text-header-md.md\:text-header-md-tablet").text
+            job_location = driver.find_element(By.CSS_SELECTOR,
+                                               "div.mb-24 p.text-primary.normal-case.text-body-md").text
+            company_name = driver.find_element(By.CSS_SELECTOR,
+                                               "div.flex.justify-between.items-start a.text-primary").text
 
             # Extract salary and job type
             job_salary = None
             job_type = None
 
             # Look for the salary range
-            salary_elements = driver.find_elements(By.CSS_SELECTOR,"div.flex.gap-x-12 p.text-primary.normal-case.text-body-md")
+            salary_elements = driver.find_elements(By.CSS_SELECTOR,
+                                                   "div.flex.gap-x-12 p.text-primary.normal-case.text-body-md")
             for elem in salary_elements:
                 text = elem.text.strip()
                 if text.startswith('$'):
@@ -104,6 +106,7 @@ def scrape_page(driver, job_dict, url):
             print(f"An unexpected error occurred on job card {i + 1}: {e}")
             i += 1  # Skip to the next job card if an error occurs
 
+
 def next_page(driver):
     try:
         # Wait for the "Next Page" button to become clickable
@@ -115,6 +118,7 @@ def next_page(driver):
     except TimeoutException:
         print("No more pages available.")
         return False
+
 
 def main():
     url = "https://www.ziprecruiter.com/jobs-search?search=software+engineer&location=Chicago%2C+IL&lvk=JG_74EGAdtycohHKniD2eg.--NacsUqfMF"
@@ -171,10 +175,10 @@ def main():
         "job_location": [],  # Location ( State )
         "company_name": [],  # Company name
         "job_type": [],  # Whether full-time, part-time, intern
-        #"job_description":[],
+        # "job_description":[],
         # "remote": [],               # Remote, in-person, hybrid
         # "wage": [],                 # $ per hour
-        "job_salary": [],             # $ per year
+        "job_salary": [],  # $ per year
         # "education": [],            # Undergrad, master, phd
         # "prog_language": [],        # Programming languages
         # "framework": [],            # React, Angular, Django, Flask, etc
