@@ -179,6 +179,20 @@ def scrape_page(driver: ChromeDriver, job_dict):
                     print("Job Type Unknown")
                     job_dict["Job Type"].append("unknown")
 
+                # Marks position as Remote if stated in
+                # the job position section
+                if "Remote" in job_dict["Job Type"][-1]:
+                    job_dict["Remote"].append("Remote")
+                
+                # Looks to see if the most recent job info
+                # section mentions a hybrid role
+                elif ("hybrid role" or "hybrid position") in job_dict["Job Info"][-1].lower():
+                    job_dict["Remote"].append("Hybrid")
+
+                # Assumes job is in-person otherwise
+                else:
+                    job_dict["Remote"].append("In-person")
+
                 try:
                     job_dict["Salary"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'span[data-testid="viewJobBodyJobCompensation"]', 0.065, 0.01).text.strip())
 
@@ -269,11 +283,8 @@ def wait_for_next_page(driver: ChromeDriver, current_page: int) -> int:
 # It is assumed that any salary which
 # includes both a 'K' and a '.' only
 # goes one decimal place to the right.
-def parse_salary_info(listings: list):
-    salary_min_max = {
-        "Salary Minimum": [],
-        "Salary Maximum": []
-    }
+def parse_salary_info(job_dict: dict[list]):
+    listings = job_dict["Salary"]
 
     for listing in listings:
         if "unknown" not in listing:
@@ -294,16 +305,22 @@ def parse_salary_info(listings: list):
                     salary_max = float("".join(filter(lambda x: x in '.0123456789', salary_max)))
 
                 if "an hour" in listing:
-                    salary_min_max["Salary Minimum"].append(salary_min * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
-                    salary_min_max["Salary Maximum"].append(salary_max * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
+                    job_dict["Salary Minimum"].append(salary_min * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
+                    job_dict["Salary Maximum"].append(salary_max * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
+                    job_dict["Wage Minimum"].append(salary_min)
+                    job_dict["Wage Maximum"].append(salary_max)
 
                 elif "a day" in listing:
-                    salary_min_max["Salary Minimum"].append(salary_min * YEARLY_WORK_DAYS)
-                    salary_min_max["Salary Maximum"].append(salary_max * YEARLY_WORK_DAYS)
+                    job_dict["Salary Minimum"].append(salary_min * YEARLY_WORK_DAYS)
+                    job_dict["Salary Maximum"].append(salary_max * YEARLY_WORK_DAYS)
+                    job_dict["Wage Minimum"].append(salary_min / DAILY_WORK_HOURS)
+                    job_dict["Wage Maximum"].append(salary_max / DAILY_WORK_HOURS)
                 
                 else:
-                    salary_min_max["Salary Minimum"].append(salary_min)
-                    salary_min_max["Salary Maximum"].append(salary_max)
+                    job_dict["Salary Minimum"].append(salary_min)
+                    job_dict["Salary Maximum"].append(salary_max)
+                    job_dict["Wage Minimum"].append(salary_min / DAILY_WORK_HOURS / YEARLY_WORK_DAYS)
+                    job_dict["Wage Maximum"].append(salary_max / DAILY_WORK_HOURS / YEARLY_WORK_DAYS)
 
             else:
                 if ('K' in listing) and ('.' in listing):
@@ -314,22 +331,31 @@ def parse_salary_info(listings: list):
                     salary = float("".join(filter(lambda x: x in '.0123456789', listing)))
 
                 if "an hour" in listing:
-                    salary_min_max["Salary Minimum"].append(salary * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
-                    salary_min_max["Salary Maximum"].append(salary * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
+                    job_dict["Salary Minimum"].append(salary * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
+                    job_dict["Salary Maximum"].append(salary * YEARLY_WORK_DAYS * DAILY_WORK_HOURS)
+                    job_dict["Wage Minimum"].append(salary)
+                    job_dict["Wage Maximum"].append(salary)
 
                 elif "a day" in listing:
-                    salary_min_max["Salary Minimum"].append(salary * YEARLY_WORK_DAYS)
-                    salary_min_max["Salary Maximum"].append(salary * YEARLY_WORK_DAYS)
+                    job_dict["Salary Minimum"].append(salary * YEARLY_WORK_DAYS)
+                    job_dict["Salary Maximum"].append(salary * YEARLY_WORK_DAYS)
+                    job_dict["Wage Minimum"].append(salary / DAILY_WORK_HOURS)
+                    job_dict["Wage Maximum"].append(salary / DAILY_WORK_HOURS)
 
                 else:
-                    salary_min_max["Salary Minimum"].append(salary)
-                    salary_min_max["Salary Maximum"].append(salary)
+                    job_dict["Salary Minimum"].append(salary)
+                    job_dict["Salary Maximum"].append(salary)
+                    job_dict["Wage Minimum"].append(salary / DAILY_WORK_HOURS / YEARLY_WORK_DAYS)
+                    job_dict["Wage Maximum"].append(salary / DAILY_WORK_HOURS / YEARLY_WORK_DAYS)
+
+            job_dict["Wage"].append([f'{job_dict["Wage Minimum"][-1]} to {job_dict["Wage Maximum"][-1]} an hour'])
 
         else:
-            salary_min_max["Salary Minimum"].append(0.0)
-            salary_min_max["Salary Maximum"].append(0.0)
-    
-    return pd.DataFrame(salary_min_max)
+            job_dict["Salary Minimum"].append(0.0)
+            job_dict["Salary Maximum"].append(0.0)
+            job_dict["Wage Minimum"].append(0.0)
+            job_dict["Wage Maximum"].append(0.0)
+            job_dict["Wage"].append("unknown")
 
 def main():
     # How many pages to search
@@ -343,14 +369,29 @@ def main():
         "Company Name": [],         # Company name
         "Job Info": [],             # An explanation of the givn position
         "Job Type": [],             # Whether full-time, part-time, intern
-        #"Remote": [],               # Remote, in-person, hybrid
-        #"Wage": [],                 # $ per hour
+        "Remote": [],               # Remote, in-person, hybrid
         "Salary": [],               # $ per year
+        "Salary Minimum": [],
+        "Salary Maximum": [],
+        "Wage": [],                 # $ per hour
+        "Wage Minimum": [],
+        "Wage Maximum": [],
         #"Education": [],            # Undergrad, master, phd
         #"Languages": [],            # Programming languages
         #"Frameworks": [],           # React, Angular, Django, Flask, etc
         "Qualifications": []         # Database, Cloud technologies, etc
     }
+
+    # The remaining fields above:
+    # * Education
+    # * Languages
+    # * Frameworks
+    #
+    # Should be handled with the
+    # aid of a Language Learning
+    # Model that searches through
+    # the job_dict["Job Info"]
+    # portion for each position.
     
     # Setting up Chrome Options
     chrome_options = Options()
@@ -417,13 +458,18 @@ def main():
 
     # Printing our dataframes containing
     # the data from the scraped pages
+    parse_salary_info(job_dict)
     listings_frame = pd.DataFrame(job_dict)
-    salary_frame = parse_salary_info(job_dict["Salary"])
-    salary_frame["Salary Minimum"] = pd.to_numeric(salary_frame["Salary Minimum"], downcast="float", errors="coerce")
-    salary_frame["Salary Maximum"] = pd.to_numeric(salary_frame["Salary Maximum"], downcast="float", errors="coerce")
 
-    listings_sortable_frame = pd.concat([listings_frame, salary_frame], axis=1)
-    print(listings_sortable_frame.sort_values(by=["Salary Minimum"], ascending=False))
+    # TODO: Fix rounding to two decimal places
+    # (currently seems to have no decimal place
+    # limit)
+    listings_frame["Salary Minimum"] = pd.to_numeric(listings_frame["Salary Minimum"], downcast="float", errors="coerce").round(2)
+    listings_frame["Salary Maximum"] = pd.to_numeric(listings_frame["Salary Maximum"], downcast="float", errors="coerce").round(2)
+    listings_frame["Wage Minimum"] = pd.to_numeric(listings_frame["Wage Minimum"], downcast="float", errors="coerce").round(2)
+    listings_frame["Wage Maximum"] = pd.to_numeric(listings_frame["Wage Maximum"], downcast="float", errors="coerce").round(2)
+
+    print(listings_frame.sort_values(by=["Salary Minimum"], ascending=False))
 
 
 if __name__ == '__main__':
