@@ -24,16 +24,17 @@ YEARLY_WORK_DAYS = 260
 DAILY_WORK_HOURS = 8
 
 # List of user agent strings
-user_agents = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
-               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.2420.81",
-               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv:124.0) Gecko/20100101 Firefox/124.0",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
-               "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-               "Mozilla/5.0 (X11; Linux i686; rv:124.0) Gecko/20100101 Firefox/124.0"]
+user_agents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/123.0.2420.81",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 OPR/109.0.0.0",
+                #"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+                #"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv:124.0) Gecko/20100101 Firefox/124.0",
+                #Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
+                #"Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 OPR/109.0.0.0",
+                #"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+                #"Mozilla/5.0 (X11; Linux i686; rv:124.0) Gecko/20100101 Firefox/124.0"
+              ]
 
 # Handy Stack Overflow page to help with
 # handling elements that haven't loaded yet:
@@ -168,7 +169,7 @@ def scrape_page(driver: ChromeDriver, job_dict):
                 job_dict["Company Name"].append(wait_for_visible_element(element, By.CSS_SELECTOR, 'span[data-testid="companyName"]').text.strip())
 
                 try:
-                    job_dict["Job Info"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'div[data-testid="viewJobBodyJobFullDescriptionContent"]', 0.03, 0.3).text.strip())
+                    job_dict["Job Info"].append(wait_for_visible_element(info_box, By.CSS_SELECTOR, 'div[data-testid="viewJobBodyJobFullDescriptionContent"]', 0.3, 0.03).text.strip())
                 except:
                     print("No Job Info :(")
                 
@@ -237,7 +238,9 @@ def scrape_page(driver: ChromeDriver, job_dict):
 # Simple enough, right? Heh...
 def next_page(driver: ChromeDriver):
     try:
-        clickable = wait_to_click_by(driver, By.CLASS_NAME, "css-1puj5o8")
+        print("Clicking navigation...")
+        clickable = wait_to_click_by(driver, By.CSS_SELECTOR, "*[role=\"navigation\"]")
+        print("Navigation clicked!")
         clickable.click()
 
     except NoSuchElementException:
@@ -253,7 +256,9 @@ def wait_for_next_page(driver: ChromeDriver, current_page: int) -> int:
     try:
         while page_number <= current_page:
             try:
-                page_navigation = wait_for_visible_element(driver, By.CLASS_NAME, "css-1hog1e3", 0.7, 0.5)
+                print("Searching navigation...")
+                page_navigation = wait_for_visible_element(driver, By.CSS_SELECTOR, "*[role=\"navigation\"]", 0.7, 0.5)
+                print("Navigation found!")
                 current_page_element = wait_for_visible_element(page_navigation, By.TAG_NAME, "span", 0.7, 0.5)
 
                 page_number = int(current_page_element.text.strip())
@@ -405,8 +410,8 @@ def main():
     # to share much more likeness to a normal
     # user as we scrape.
     chrome_options.add_experimental_option('useAutomationExtension', False)
-    # chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    # chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
 
     # The "--headless" argument means that the
     # scraping will occur without showing the
@@ -431,12 +436,14 @@ def main():
     # in our avoidance of detection
     stealth(
         driver,
+        #user_agent=random_user_agent,
         languages=["en-US", "en"],
         vendor="Google Inc.",
-        platform="Win32",
+        platform="Win64",
         webgl_vendor="Intel Inc.",
         renderer="Intel Iris OpenGL Engine",
-        fix_hairline=True,
+        fix_hairline=False,
+        run_on_insecure_origins=False,
     )
 
     # The URL to visit
